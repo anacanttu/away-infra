@@ -7,7 +7,7 @@ Projeto Integrador | Uniamérica Descomplica | Disciplina: Projeto Integrador | 
 | Integrante | GitHub |
 |---|---|
 | Ana Luisa Cantu | [@anacanttu](https://github.com/anacanttu) |
-| _preencher_ | _preencher_ |
+| Pablo | @ |
 
 > Substituir/completar esta tabela com todos os integrantes do grupo antes da entrega.
 
@@ -40,11 +40,3 @@ Nesta entrega (Entrega 1) nenhuma infraestrutura é criada — o conteúdo é o 
 └── infra/                             # Vazio nesta entrega; Terraform/OpenTofu na Entrega 2
 ```
 
-## Como reproduzir o diagrama
-
-```bash
-pip install diagrams
-brew install graphviz   # ou: apt-get install graphviz
-cd docs/diagramas
-python3 arquitetura.py
-```
