@@ -20,7 +20,7 @@
 
 **Requisitos não funcionais assumidos.**
 - **Usuários simultâneos**: baixo (estimativa de 5 a 15 usuários simultâneos em horário de pico), compatível com uma instituição de porte pequeno/médio.
-- **Disponibilidade esperada**: **esta entrega não oferece alta disponibilidade.** Todos os recursos ficam em uma única zona de disponibilidade, com uma única instância de aplicação e um banco de dados single-AZ. Uma falha de instância, de AZ ou uma janela de manutenção do RDS single-AZ derruba o sistema até recuperação manual ou automática (RDS) — ver seção 5.10 (Riscos).
+- **Disponibilidade esperada**: **esta entrega não oferece alta disponibilidade.** Toda a computação e os dados ficam em uma única zona de disponibilidade (`sa-east-1a`): uma única instância de aplicação e um banco de dados single-AZ. Uma segunda AZ (`sa-east-1b`) existe na rede apenas para satisfazer exigências estruturais da AWS (o Application Load Balancer exige subnets em pelo menos duas AZs, e o DB Subnet Group do RDS também — ver seção 5.3), mas não há nenhuma instância, réplica nem failover real rodando nela. Uma falha de instância, da AZ `sa-east-1a` ou uma janela de manutenção do RDS single-AZ derruba o sistema até recuperação manual ou automática (RDS) — ver seção 5.10 (Riscos).
 - **Consistência de dados**: forte (RDS PostgreSQL, transacional), sem necessidade de consistência eventual.
 
 ## 5.2 Diagrama de arquitetura
@@ -30,11 +30,11 @@
 Fonte editável (diagrams-as-code): [`diagramas/arquitetura.py`](diagramas/arquitetura.py).
 
 O diagrama contém:
-- Provedor (AWS), região (`sa-east-1` — São Paulo) e zona de disponibilidade (`sa-east-1a`, única nesta entrega).
+- Provedor (AWS), região (`sa-east-1` — São Paulo) e duas zonas de disponibilidade: `sa-east-1a` (onde roda toda a computação e os dados) e `sa-east-1b` (existe só para satisfazer os requisitos de rede do ALB e do RDS — ver seção 5.3).
 - VPC `vpc-away` com CIDR `10.20.0.0/16`.
-- Sub-rede pública `pub-a` (`10.20.1.0/24`) e sub-rede privada `priv-a` (`10.20.10.0/24`).
+- Quatro sub-redes: `pub-a` (`10.20.1.0/24`) e `priv-a` (`10.20.10.0/24`) em `sa-east-1a`; `pub-b` (`10.20.2.0/24`) e `priv-b` (`10.20.20.0/24`) em `sa-east-1b`.
 - Internet Gateway e NAT Gateway.
-- Instâncias/serviços com sub-rede, tipo e IP público indicados: Bastion (pública, IP público), ALB (pública, IP público/DNS), instância de aplicação `app-away` (privada, sem IP público), RDS `db-away` (privada, sem IP público).
+- Instâncias/serviços com sub-rede, tipo e IP público indicados: Bastion (pública, `pub-a`, IP público), ALB (pública, com uma interface em `pub-a` e outra em `pub-b` — exigência da AWS, não escolha de HA —, IP público/DNS), instância de aplicação `app-away` (privada, `priv-a`, sem IP público), RDS `db-away` (privada, associada a um DB Subnet Group que inclui `priv-a` e `priv-b`, mas rodando fisicamente só em `priv-a`, sem IP público). `priv-b` não tem nenhuma instância nem réplica — existe vazia, reservada apenas para o DB Subnet Group.
 - Grupos de segurança aplicados a cada recurso (`sg-bastion`, `sg-alb`, `sg-app`, `sg-db`).
 - Três fluxos numerados:
   1. **Usuário final** → Internet Gateway → ALB (HTTPS 443) → instância de aplicação (porta 80, interno).
@@ -46,13 +46,21 @@ O diagrama contém:
 | Recurso | Nome | CIDR | Zona | Tipo | Finalidade |
 |---|---|---|---|---|---|
 | Rede virtual | `vpc-away` | `10.20.0.0/16` | - | - | Rede do projeto |
-| Sub-rede | `pub-a` | `10.20.1.0/24` | `sa-east-1a` | Pública | Bastion, NAT Gateway, ALB |
+| Sub-rede | `pub-a` | `10.20.1.0/24` | `sa-east-1a` | Pública | Bastion, NAT Gateway, ALB (interface primária) |
 | Sub-rede | `priv-a` | `10.20.10.0/24` | `sa-east-1a` | Privada | Aplicação (`app-away`), banco (`db-away`) |
+| Sub-rede | `pub-b` | `10.20.2.0/24` | `sa-east-1b` | Pública | ALB (segunda interface — exigência da AWS) |
+| Sub-rede | `priv-b` | `10.20.20.0/24` | `sa-east-1b` | Privada | Reservada para o DB Subnet Group do RDS; sem instâncias |
+
+**Por que existem `pub-b` e `priv-b` se a arquitetura é single-AZ.** Dois serviços gerenciados da AWS têm uma exigência estrutural de rede que independe de a arquitetura ser ou não de alta disponibilidade:
+- um **Application Load Balancer precisa de subnets em pelo menos duas zonas de disponibilidade** para ser criado, mesmo que só exista um alvo (target) rodando em uma delas;
+- um **RDS precisa de um DB Subnet Group que cubra pelo menos duas AZs**, mesmo quando a instância do banco é Single-AZ (não Multi-AZ).
+
+Por isso `pub-b` e `priv-b` existem na rede, mas **nenhuma instância de aplicação nem réplica de banco roda nelas** — `priv-b` fica vazia, e `pub-b` só hospeda a segunda interface de rede do ALB. Isso não é alta disponibilidade real (ver seção 5.1 e 5.10): se `sa-east-1a` cair, a aplicação e o banco caem juntos, porque é lá que eles de fato rodam.
 
 **Justificativa dos tamanhos.**
-- **VPC `/16`** (65.536 endereços): folga generosa para a Entrega 2, que deve adicionar uma segunda zona de disponibilidade (`pub-b`/`priv-b`) para alta disponibilidade, sem precisar renumerar a rede existente.
-- **Sub-redes `/24`** (256 endereços cada, 251 utilizáveis): nesta entrega só existem 4 recursos no total (bastion, NAT Gateway, ALB e a instância/RDS), mas um `/24` é o menor tamanho que ainda deixa espaço confortável para o ALB (que pode consumir múltiplos ENIs ao escalar) e para futuras instâncias, sem risco de esgotar endereços.
-- **Sem sobreposição**: `10.20.1.0/24` e `10.20.10.0/24` não se sobrepõem entre si nem com o restante do bloco `/16`.
+- **VPC `/16`** (65.536 endereços): folga generosa para a Entrega 2, que deve expandir o uso de `sa-east-1b` (e talvez adicionar uma terceira AZ) para alta disponibilidade real, sem precisar renumerar a rede existente.
+- **Sub-redes `/24`** (256 endereços cada, 251 utilizáveis): nesta entrega há poucos recursos (bastion, NAT Gateway, ALB, a instância de aplicação e o RDS), mas um `/24` é o menor tamanho que ainda deixa espaço confortável para o ALB (que pode consumir múltiplos ENIs ao escalar) e para futuras instâncias, sem risco de esgotar endereços.
+- **Sem sobreposição**: `10.20.1.0/24`, `10.20.2.0/24`, `10.20.10.0/24` e `10.20.20.0/24` não se sobrepõem entre si nem com o restante do bloco `/16`.
 
 **Endereços reservados pela AWS.** Em cada sub-rede a AWS reserva 5 endereços (não disponíveis para uso): o endereço de rede, o roteador da VPC (+1), o DNS da Amazon (+2), um endereço reservado para uso futuro (+3) e o endereço de broadcast (último, embora VPCs não usem broadcast). Em uma sub-rede `/24` isso deixa **251 endereços utilizáveis**.
 
@@ -62,8 +70,14 @@ O diagrama contém:
 |---|---|---|
 | `pub-a` (pública) | `10.20.0.0/16` | local |
 | `pub-a` (pública) | `0.0.0.0/0` | Internet Gateway |
+| `pub-b` (pública) | `10.20.0.0/16` | local |
+| `pub-b` (pública) | `0.0.0.0/0` | Internet Gateway |
 | `priv-a` (privada) | `10.20.0.0/16` | local |
 | `priv-a` (privada) | `0.0.0.0/0` | NAT Gateway (em `pub-a`) |
+| `priv-b` (privada) | `10.20.0.0/16` | local |
+| `priv-b` (privada) | `0.0.0.0/0` | NAT Gateway (em `pub-a`) |
+
+`pub-a`/`pub-b` compartilham a mesma tabela de rotas ("pública"), e `priv-a`/`priv-b` compartilham a mesma tabela "privada" — não é necessário criar quatro tabelas distintas, duas bastam (uma associada às duas sub-redes públicas, outra às duas privadas).
 
 **O que aconteceria sem a rota `0.0.0.0/0 → NAT Gateway` na sub-rede privada:** a instância de aplicação continuaria acessível internamente (ALB conseguiria alcançá-la, o bastion conseguiria SSH nela, ela conseguiria falar com o RDS — tudo isso via a rota `local`), mas perderia qualquer capacidade de iniciar conexões para fora da VPC. Na prática, `apt update`, download de imagens Docker, ou qualquer chamada a um serviço externo feita pela aplicação falhariam por timeout, já que os pacotes de resposta não teriam como retornar sem um caminho de saída roteável para a internet.
 
@@ -148,7 +162,7 @@ Esse é o valor que o grupo efetivamente pagaria pela Entrega 2, dado que o ambi
 
 ## 5.10 Riscos e limitações
 
-1. **Único ponto de falha: zona de disponibilidade única (`sa-east-1a`).** Todos os recursos — bastion, ALB, instância de aplicação e RDS — estão na mesma AZ. Uma interrupção dessa AZ (rara, mas já aconteceu na AWS) derruba o sistema inteiro simultaneamente, sem failover automático para outra AZ. Impacto: indisponibilidade total até a AZ ser restaurada pela AWS ou até o grupo reconstruir manualmente a infraestrutura em outra AZ.
+1. **Único ponto de falha: toda a computação e os dados estão em uma única zona de disponibilidade (`sa-east-1a`).** Bastion, NAT Gateway, a instância de aplicação e o RDS rodam todos em `sa-east-1a`. A segunda AZ (`sa-east-1b`) existe só porque o ALB e o DB Subnet Group do RDS exigem presença de rede em duas AZs (seção 5.3) — ela não hospeda nenhuma instância nem réplica. Uma interrupção de `sa-east-1a` (rara, mas já aconteceu na AWS) derruba o sistema inteiro simultaneamente, sem failover automático, porque não há nada rodando em `sa-east-1b` para assumir. Impacto: indisponibilidade total até a AZ ser restaurada pela AWS ou até o grupo reconstruir manualmente a infraestrutura em `sa-east-1b`.
 
 2. **Instância de aplicação única, sem redundância.** Não há Auto Scaling nem uma segunda instância atrás do ALB. Se a instância `app-away` falhar (pane de kernel, erro de deploy, instância corrompida), a aplicação inteira fica fora do ar até alguém notar e recriar a instância manualmente — não há health check com substituição automática. Impacto: tempo de indisponibilidade não planejado, dependente de intervenção humana.
 
