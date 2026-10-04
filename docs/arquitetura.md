@@ -2,23 +2,23 @@
 
 ## 5.1 Descrição da aplicação
 
-**Problema que resolve.** O AWAY é um sistema de gestão para um patronato penitenciário: controla o cadastro de assistidos (pessoas em cumprimento de pena em regime aberto/semiaberto), o registro de comparecimentos obrigatórios, o cadastro de usuários do sistema (funcionários e administradores) e a documentação associada a cada assistido.
+**Problema que resolve:** O AWAY é um sistema de gestão para um patronato penitenciário: controla o cadastro de assistidos (pessoas em cumprimento de pena em regime aberto/semiaberto), o registro de comparecimentos obrigatórios, o cadastro de usuários do sistema (funcionários e administradores) e a documentação associada a cada assistido.
 
 **Usuários.** Funcionários e administradores da instituição, todos internos — não há usuário público/anônimo. Uso concentrado em horário comercial, de segunda a sexta.
 
-**Funcionalidades principais.**
+**Funcionalidades principais**
 - CRUD de assistidos (cadastro, edição, listagem, exclusão)
 - Registro e consulta de comparecimentos
 - CRUD de usuários com dois perfis (ADMIN, FUNCIONARIO)
 - Autenticação e autorização baseada em papéis
 
-**Componentes técnicos.**
+**Componentes técnicos**
 - **Frontend**: SPA em Angular, servida como arquivos estáticos por Nginx.
 - **Backend**: API REST em Spring Boot (Java 17), rodando na mesma instância que o Nginx (proxy reverso local).
 - **Banco de dados**: PostgreSQL, gerenciado (Amazon RDS).
 - **Autenticação**: Keycloak, containerizado, rodando na mesma instância da aplicação.
 
-**Requisitos não funcionais assumidos.**
+**Requisitos não funcionais assumidos**
 - **Usuários simultâneos**: baixo (estimativa de 5 a 15 usuários simultâneos em horário de pico), compatível com uma instituição de porte pequeno/médio.
 - **Disponibilidade esperada**: **esta entrega não oferece alta disponibilidade.** Toda a computação e os dados ficam em uma única zona de disponibilidade (`sa-east-1a`): uma única instância de aplicação e um banco de dados single-AZ. Uma segunda AZ (`sa-east-1b`) existe na rede apenas para satisfazer exigências estruturais da AWS (o Application Load Balancer exige subnets em pelo menos duas AZs, e o DB Subnet Group do RDS também — ver seção 5.3), mas não há nenhuma instância, réplica nem failover real rodando nela. Uma falha de instância, da AZ `sa-east-1a` ou uma janela de manutenção do RDS single-AZ derruba o sistema até recuperação manual ou automática (RDS) — ver seção 5.10 (Riscos).
 - **Consistência de dados**: forte (RDS PostgreSQL, transacional), sem necessidade de consistência eventual.
