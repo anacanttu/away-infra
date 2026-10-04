@@ -7,9 +7,7 @@ Claude (Anthropic), via Claude Code, no papel de assistente de redação e pesqu
 ## Em quais partes foi usada
 
 - **Redação inicial de todo o conteúdo** deste repositório: `docs/arquitetura.md`, os três ADRs em `docs/adr/`, este `IA.md` e o `README.md`.
-- **Geração do diagrama de arquitetura** (`docs/diagramas/arquitetura.py`), usando a biblioteca Python `diagrams` (diagrams-as-code), a partir da descrição da arquitetura decidida em conversa com o grupo.
-- **Preenchimento da estimativa de custo** na AWS Pricing Calculator (interação direta com a calculadora oficial via navegador), incluindo a escolha de tipos de instância, região e parâmetros de uso.
-- **Pesquisa de preços e comportamento de serviços da AWS** (ex.: descoberta de que o NAT Gateway é mais caro em `sa-east-1` do que em `us-east-1`, e de que existe uma seção "Gateway NAT regional" separada na calculadora que precisou ser zerada para não inflar o custo).
+- 
 
 ## O que o grupo verificou ou corrigiu
 
