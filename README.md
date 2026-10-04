@@ -9,7 +9,6 @@ Projeto Integrador | Uniamérica Descomplica | Disciplina: Projeto Integrador | 
 | Ana Luisa Cantu | [@anacanttu](https://github.com/anacanttu) |
 | Pablo | @ |
 
-> Substituir/completar esta tabela com todos os integrantes do grupo antes da entrega.
 
 ## Visão geral
 
