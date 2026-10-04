@@ -85,7 +85,7 @@ Por isso `pub-b` e `priv-b` existem na rede, mas **nenhuma instância de aplica�
 
 | Grupo de segurança | Direção | Protocolo | Porta | Origem/Destino | Justificativa |
 |---|---|---|---|---|---|
-| `sg-bastion` | Entrada | TCP | 22 | IP do grupo (`/32`) | Acesso administrativo restrito a quem de fato administra a infraestrutura — nunca aberto à internet. |
+| `sg-bastion` | Entrada | TCP | 22 | IP público do administrador (`/32`) | Acesso administrativo restrito a quem de fato administra a infraestrutura — nunca aberto à internet. |
 | `sg-alb` | Entrada | TCP | 443 | `0.0.0.0/0` | Acesso público HTTPS ao sistema (é o componente que precisa ficar exposto à internet). |
 | `sg-alb` | Entrada | TCP | 80 | `0.0.0.0/0` | Redirecionamento automático para HTTPS (443); nenhum dado de aplicação trafega em texto plano nesta porta. |
 | `sg-app` | Entrada | TCP | 80 | `sg-alb` | A instância de aplicação só aceita tráfego HTTP vindo do próprio ALB, nunca diretamente da internet. |
