@@ -119,7 +119,7 @@ Por isso `pub-b` e `priv-b` existem na rede, mas **nenhuma instância de aplica�
 
 ## 5.9 Estimativa de custos
 
-Estimativa construída na **AWS Pricing Calculator** (calculadora oficial). Link compartilhável: **https://calculator.aws/#/estimate?id=fb1b3c28d751b636a26f5e3a5a9c6ac242df4a17**. Exportação em CSV: [`custos/estimativa.csv`](custos/estimativa.csv).
+Estimativa construída na **AWS Pricing Calculator** (calculadora oficial). Link compartilhável: **https://calculator.aws/#/estimate?id=fb1b3c28d751b636a26f5e3a5a9c6ac242df4a17**. Exportação em PDF: [`custos/estimativa.pdf`](custos/estimativa.pdf).
 
 ### Cenário A — operação contínua (730 h/mês)
 

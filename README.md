@@ -36,7 +36,7 @@ Nesta entrega (Entrega 1) nenhuma infraestrutura é criada — o conteúdo é o 
 │   │   ├── arquitetura.py             # Fonte editável (diagrams-as-code)
 │   │   └── arquitetura.png            # Imagem exportada
 │   └── custos/
-│       └── estimativa.csv             # Exportação da AWS Pricing Calculator
+│       └── estimativa.pdf             # Exportação da AWS Pricing Calculator
 └── infra/                             # Vazio nesta entrega; Terraform/OpenTofu na Entrega 2
 ```
 
