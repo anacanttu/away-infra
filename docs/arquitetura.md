@@ -4,7 +4,7 @@
 
 **Problema que resolve:** O AWAY é um sistema de gestão para um patronato penitenciário: controla o cadastro de assistidos (pessoas em cumprimento de pena em regime aberto/semiaberto), o registro de comparecimentos obrigatórios, o cadastro de usuários do sistema (funcionários e administradores) e a documentação associada a cada assistido.
 
-**Usuários.** Funcionários e administradores da instituição, todos internos — não há usuário público/anônimo. Uso concentrado em horário comercial, de segunda a sexta.
+**Usuários:** Funcionários e administradores da instituição, todos internos, não há usuário público/anônimo. Uso concentrado em horário comercial, de segunda a sexta.
 
 **Funcionalidades principais**
 - CRUD de assistidos (cadastro, edição, listagem, exclusão)
