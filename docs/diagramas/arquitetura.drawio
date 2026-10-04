@@ -1,0 +1,138 @@
+<mxfile host="app.diagrams.net" agent="away-infra" version="24.0.0">
+  <diagram name="AWAY - Arquitetura AWS" id="away-arq">
+    <mxGraphModel dx="1400" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="AWAY - Arquitetura AWS (Entrega 1)" style="text;html=1;fontSize=22;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="450" y="10" width="500" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Users -->
+        <mxCell id="user_final" value="Usuario final" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#232F3E;strokeColor=#16202A;fontColor=#232F3E;fontSize=13;fontStyle=1;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="305" y="60" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" value="Administrador (SSH)" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#232F3E;strokeColor=#16202A;fontColor=#232F3E;fontSize=13;fontStyle=1;verticalLabelPosition=bottom;verticalAlign=top;labelBackgroundColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="895" y="60" width="60" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Internet Gateway -->
+        <mxCell id="igw" value="Internet Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8C4FFF;strokeColor=#5A2EA6;fontColor=#ffffff;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="565" y="190" width="170" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Region container -->
+        <mxCell id="region" value="AWS - Regiao sa-east-1 (Sao Paulo)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#232F3E;dashed=1;verticalAlign=top;align=left;fontSize=14;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="80" y="290" width="1260" height="1230" as="geometry" />
+        </mxCell>
+
+        <!-- VPC container -->
+        <mxCell id="vpc" value="VPC vpc-away | CIDR 10.20.0.0/16" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EAF4FD;strokeColor=#147EBA;verticalAlign=top;align=left;fontSize=13;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="110" y="340" width="1200" height="1150" as="geometry" />
+        </mxCell>
+
+        <!-- AZ-a container -->
+        <mxCell id="aza" value="Zona de disponibilidade: sa-east-1a  (onde tudo roda de fato)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;fontSize=12;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="140" y="390" width="570" height="1070" as="geometry" />
+        </mxCell>
+
+        <!-- AZ-b container -->
+        <mxCell id="azb" value="Zona de disponibilidade: sa-east-1b  (so existe por exigencia de rede do ALB e do RDS)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;fontSize=12;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="740" y="390" width="540" height="1070" as="geometry" />
+        </mxCell>
+
+        <!-- pub-a -->
+        <mxCell id="puba" value="Subnet publica  pub-a  |  10.20.1.0/24" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF4E5;strokeColor=#FF9900;verticalAlign=top;align=left;fontSize=12;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="160" y="440" width="530" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="bastion" value="Bastion&#10;sg-bastion&#10;IP publico&#10;(SSH 22)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#CC7A00;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="500" width="150" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="nat" value="NAT Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8C4FFF;strokeColor=#5A2EA6;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="500" width="150" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="alb1" value="ALB&#10;sg-alb&#10;HTTPS 443&#10;(interface primaria)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8C4FFF;strokeColor=#5A2EA6;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="500" width="150" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- priv-a -->
+        <mxCell id="priva" value="Subnet privada  priv-a  |  10.20.10.0/24" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0EAFB;strokeColor=#8C4FFF;verticalAlign=top;align=left;fontSize=12;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="160" y="730" width="530" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="app" value="app-away&#10;sg-app  |  sem IP publico&#10;Nginx + Angular + Spring Boot + Keycloak" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9900;strokeColor=#CC7A00;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="190" y="800" width="470" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="db-away&#10;sg-db  |  PostgreSQL  |  sem IP publico" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3B48CC;strokeColor=#232F9E;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="190" y="990" width="470" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- pub-b -->
+        <mxCell id="pubb" value="Subnet publica  pub-b  |  10.20.2.0/24" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF4E5;strokeColor=#FF9900;verticalAlign=top;align=left;fontSize=12;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="760" y="440" width="500" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="alb2" value="ALB - interface secundaria&#10;(exigida p/ ALB existir;&#10;nao e redundancia de HA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8C4FFF;strokeColor=#5A2EA6;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="500" width="190" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- priv-b -->
+        <mxCell id="privb" value="Subnet privada  priv-b  |  10.20.20.0/24" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0EAFB;strokeColor=#8C4FFF;verticalAlign=top;align=left;fontSize=12;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="760" y="730" width="500" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="reservada" value="(reservada para o DB Subnet Group&#10;do RDS - sem instancias)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;dashed=1;fontColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="820" y="790" width="380" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Legenda fluxos -->
+        <mxCell id="legenda" value="Legenda: 1 = usuario final (azul) | 2 = admin via SSH (laranja tracejado) | 3 = saida p/ internet via NAT (verde pontilhado) | cinza tracejado = exigencia estrutural (nao e trafego real)" style="text;html=1;fontSize=11;fontStyle=2;align=left;verticalAlign=middle;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="140" y="1460" width="1140" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Fluxo 1: usuario -> igw -> alb1 -> app -->
+        <mxCell id="e1" value="1. HTTPS 443" style="endArrow=block;html=1;strokeColor=#1A73E8;strokeWidth=2;fontColor=#1A73E8;fontSize=11;" edge="1" parent="1" source="user_final" target="igw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="endArrow=block;html=1;strokeColor=#1A73E8;strokeWidth=2;" edge="1" parent="1" source="igw" target="alb1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="80 (interno)" style="endArrow=block;html=1;strokeColor=#1A73E8;strokeWidth=2;fontColor=#1A73E8;fontSize=11;" edge="1" parent="1" source="alb1" target="app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Fluxo 2: admin -> igw -> bastion -> app -->
+        <mxCell id="e4" value="2. SSH 22" style="endArrow=block;html=1;strokeColor=#E8710A;strokeWidth=2;dashed=1;fontColor=#E8710A;fontSize=11;" edge="1" parent="1" source="admin" target="igw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="endArrow=block;html=1;strokeColor=#E8710A;strokeWidth=2;dashed=1;" edge="1" parent="1" source="igw" target="bastion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="SSH 22" style="endArrow=block;html=1;strokeColor=#E8710A;strokeWidth=2;dashed=1;fontColor=#E8710A;fontSize=11;" edge="1" parent="1" source="bastion" target="app">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Fluxo 3: app -> nat -> igw -->
+        <mxCell id="e7" value="3. saida internet" style="endArrow=block;html=1;strokeColor=#188038;strokeWidth=2;dashed=1;dashPattern=1 2;fontColor=#188038;fontSize=11;" edge="1" parent="1" source="app" target="nat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="endArrow=block;html=1;strokeColor=#188038;strokeWidth=2;dashed=1;dashPattern=1 2;" edge="1" parent="1" source="nat" target="igw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Trafego interno app -> db -->
+        <mxCell id="e9" value="5432" style="endArrow=block;html=1;strokeColor=#5F6368;strokeWidth=1.5;fontColor=#5F6368;fontSize=11;" edge="1" parent="1" source="app" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Conexoes estruturais (cinza tracejado) -->
+        <mxCell id="e10" value="mesmo ALB logico" style="endArrow=none;startArrow=none;html=1;strokeColor=#9AA0A6;strokeWidth=1.5;dashed=1;fontColor=#9AA0A6;fontSize=10;" edge="1" parent="1" source="alb1" target="alb2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" value="DB Subnet Group" style="endArrow=none;startArrow=none;html=1;strokeColor=#9AA0A6;strokeWidth=1.5;dashed=1;fontColor=#9AA0A6;fontSize=10;" edge="1" parent="1" source="db" target="reservada">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

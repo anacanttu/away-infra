@@ -7,7 +7,7 @@ Claude (Anthropic), via Claude Code, no papel de assistente de redação e pesqu
 ## Em quais partes foi usada
 
 - **Redação inicial de todo o conteúdo** deste repositório: `docs/arquitetura.md`, os três ADRs em `docs/adr/`, este `IA.md` e o `README.md`.
-- **Geração do diagrama de arquitetura** (`docs/diagramas/arquitetura.py`), usando a biblioteca Python `diagrams` (diagrams-as-code), a partir da descrição da arquitetura decidida em conversa com o grupo.
+- **Geração do diagrama de arquitetura** (`docs/diagramas/arquitetura.drawio`, formato draw.io/diagrams.net), a partir da descrição da arquitetura decidida em conversa com o grupo; o PNG foi exportado diretamente desse arquivo-fonte via linha de comando do draw.io.
 - **Preenchimento da estimativa de custo** na AWS Pricing Calculator (interação direta com a calculadora oficial via navegador), incluindo a escolha de tipos de instância, região e parâmetros de uso.
 - **Pesquisa de preços e comportamento de serviços da AWS** (ex.: descoberta de que o NAT Gateway é mais caro em `sa-east-1` do que em `us-east-1`, e de que existe uma seção "Gateway NAT regional" separada na calculadora que precisa ficar zerada/no mínimo para não inflar o custo por engano — isso de fato aconteceu uma vez durante o trabalho, gerando um PDF com estimativa de 356,95 USD/mês que foi descartado por estar incorreto).
 - **Revisão do diagrama/documento** apontando duas exigências estruturais da AWS que a primeira versão da arquitetura não atendia: o Application Load Balancer precisa de subnets em pelo menos duas zonas de disponibilidade, e o DB Subnet Group do RDS também. O documento foi corrigido para incluir `pub-b`/`priv-b` sem transformar a arquitetura em alta disponibilidade real.

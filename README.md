@@ -33,7 +33,7 @@ Nesta entrega (Entrega 1) nenhuma infraestrutura é criada — o conteúdo é o 
 │   │   ├── 002-saida-internet-subrede-privada.md
 │   │   └── 003-localizacao-banco.md
 │   ├── diagramas/
-│   │   ├── arquitetura.py             # Fonte editável (diagrams-as-code)
+│   │   ├── arquitetura.drawio         # Fonte editável (draw.io/diagrams.net)
 │   │   └── arquitetura.png            # Imagem exportada
 │   └── custos/
 │       └── estimativa.pdf             # Exportação da AWS Pricing Calculator

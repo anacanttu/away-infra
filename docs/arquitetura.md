@@ -27,7 +27,7 @@
 
 ![Diagrama de arquitetura AWAY](diagramas/arquitetura.png)
 
-Fonte editável (diagrams-as-code): [`diagramas/arquitetura.py`](diagramas/arquitetura.py).
+Fonte editável (draw.io/diagrams.net): [`diagramas/arquitetura.drawio`](diagramas/arquitetura.drawio) — pode ser aberto em [app.diagrams.net](https://app.diagrams.net) ou no draw.io desktop.
 
 O diagrama contém:
 - Provedor (AWS), região (`sa-east-1` — São Paulo) e duas zonas de disponibilidade: `sa-east-1a` (onde roda toda a computação e os dados) e `sa-east-1b` (existe só para satisfazer os requisitos de rede do ALB e do RDS — ver seção 5.3).
@@ -112,7 +112,7 @@ Por isso `pub-b` e `priv-b` existem na rede, mas **nenhuma instância de aplica�
 | Componente | Família | Tipo | vCPU | Memória | Disco | Sub-rede | Justificativa |
 |---|---|---|---|---|---|---|---|
 | Bastion | t4g (ARM, créditos de CPU) | `t4g.nano` | 2 | 0,5 GiB | gp3, 8 GB | `pub-a` | Uso puramente esporádico (só quando alguém precisa dar SSH para manutenção); não roda nenhum serviço além do SSH. O menor tamanho disponível já atende com folga; não há por que pagar por mais. |
-| Aplicação | t4g (ARM, créditos de CPU) | `t4g.small` | 2 | 2 GiB | gp3, 20 GB | `priv-a` | A instância roda simultaneamente Nginx, o backend Spring Boot (JVM) e o Keycloak em container — só a JVM já costuma consumir several centenas de MB; 2 GiB é o mínimo realista para os três processos coexistirem sem *swapping* constante. Um `t4g.micro` (1 GiB) seria insuficiente. |
+| Aplicação | t4g (ARM, créditos de CPU) | `t4g.small` | 2 | 2 GiB | gp3, 20 GB | `priv-a` | A instância roda simultaneamente Nginx, o backend Spring Boot (JVM) e o Keycloak em container — só a JVM já costuma consumir várias centenas de MB; 2 GiB é o mínimo realista para os três processos coexistirem sem *swapping* constante. Um `t4g.micro` (1 GiB) seria insuficiente. |
 | Banco de dados | t4g (ARM, créditos de CPU) | `db.t4g.micro` | 2 | 1 GiB | gp3, 20 GB | `priv-a` | Carga de banco baixa (poucos usuários simultâneos, consultas simples de CRUD); 1 GiB de memória é suficiente para o *working set* do PostgreSQL nesse volume de dados. |
 
 **Comportamento ao esgotar os créditos de CPU (família `t4g`, `Unlimited` desativado por padrão).** Todas as instâncias escolhidas são da família `t4g`, que usa CPU compartilhada com um saldo de créditos: a instância acumula créditos quando está ociosa e os gasta quando processa acima da linha de base (definida por tamanho). Em modo padrão (*Standard*, sem *T4g Unlimited*), se os créditos acabarem durante um pico de uso sustentado, a instância é **limitada (throttled)** à performance da linha de base (não é desligada nem perde dados) — na prática, requisições ficam mais lentas até o saldo de créditos se recompor. Dado o perfil de uso do AWAY (uso interno, picos curtos de CRUD, não processamento contínuo), esse é um trade-off aceitável: o grupo prioriza o custo baixo das instâncias `t4g` sobre a garantia de performance constante que uma família de uso geral (ex.: `m6g`) ofereceria a um custo maior.
