@@ -1,0 +1,9 @@
+# Copie para vault.yml, preencha e CRIPTOGRAFE:
+#   cp group_vars/all/vault.yml.example group_vars/all/vault.yml
+#   ansible-vault encrypt group_vars/all/vault.yml     (use a senha do cofre em .vault_pass)
+# Para ver/editar depois: ansible-vault view|edit group_vars/all/vault.yml
+keycloak_admin_password: "TROQUE-por-uma-senha-forte"
+keycloak_client_secret: "gere-com: openssl rand -hex 16"
+demo_users:
+  - { username: "pedro@away.com", password: "TROQUE" }
+  - { username: "funcionario@away.com", password: "TROQUE" }

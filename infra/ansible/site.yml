@@ -1,0 +1,168 @@
+---
+# Etapa 1 (na sua máquina): busca a senha do RDS no Secrets Manager.
+# Ela é gerada pela AWS, nunca fica em arquivo.
+- name: Ler senha do banco no Secrets Manager
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Buscar segredo do RDS
+      ansible.builtin.command: >
+        aws secretsmanager get-secret-value
+        --secret-id {{ hostvars['app-away'].db_secret_arn }}
+        --region {{ region }}
+        --query SecretString --output text
+      register: db_secret
+      changed_when: false
+      no_log: true
+
+    - name: Guardar a senha do banco em memória
+      ansible.builtin.set_fact:
+        db_password: "{{ (db_secret.stdout | from_json).password }}"
+      no_log: true
+
+# Etapa 2 (na EC2 app-away, Ubuntu 22.04): instala Docker e sobe Nginx + Spring Boot + Keycloak.
+- name: Configurar a EC2 da aplicação
+  hosts: app
+  become: true
+  tasks:
+    - name: Instalar Docker (Ubuntu 22.04)
+      ansible.builtin.apt:
+        name: docker.io
+        state: present
+        update_cache: true
+
+    - name: Habilitar e iniciar o Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Criar diretório do plugin
+      ansible.builtin.file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: "0755"
+
+    - name: Baixar o plugin docker compose (ARM64)
+      ansible.builtin.get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ compose_version }}/docker-compose-linux-aarch64"
+        dest: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: "0755"
+
+    - name: Criar swap de 1 GB (rede de segurança para a memória)
+      ansible.builtin.shell: |
+        fallocate -l 1G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+        echo '/swapfile none swap sw 0 0' >> /etc/fstab
+      args:
+        creates: /swapfile
+
+    - name: Criar diretórios da aplicação
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ app_dir }}"
+        - "{{ app_dir }}/nginx"
+        - "{{ app_dir }}/frontend"
+        - "{{ app_dir }}/backend"
+        - "{{ app_dir }}/keycloak/import"
+
+    - name: Copiar o war executável do backend
+      ansible.builtin.copy:
+        src: "{{ backend_war }}"
+        dest: "{{ app_dir }}/backend/app.war"
+        mode: "0644"
+
+    - name: Copiar o build do Angular
+      ansible.builtin.copy:
+        src: "{{ frontend_dist }}"
+        dest: "{{ app_dir }}/frontend/"
+        mode: preserve
+
+    - name: Configuração do Nginx
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: "{{ app_dir }}/nginx/default.conf"
+        mode: "0644"
+
+    - name: Variáveis de ambiente do backend (com segredos)
+      ansible.builtin.template:
+        src: backend.env.j2
+        dest: "{{ app_dir }}/backend/backend.env"
+        mode: "0600"
+      no_log: true
+
+    - name: Realm do Keycloak (injeta o client secret)
+      ansible.builtin.copy:
+        content: "{{ lookup('file', 'away-realm.json') | replace('__KEYCLOAK_CLIENT_SECRET__', keycloak_client_secret) }}"
+        dest: "{{ app_dir }}/keycloak/import/away-realm.json"
+        mode: "0600"
+      no_log: true
+
+    - name: docker-compose.yml
+      ansible.builtin.template:
+        src: docker-compose.yml.j2
+        dest: "{{ app_dir }}/docker-compose.yml"
+        mode: "0600"
+      no_log: true
+
+    - name: Subir os containers
+      ansible.builtin.command: docker compose up -d --pull always
+      args:
+        chdir: "{{ app_dir }}"
+      changed_when: true
+
+    - name: Esperar o Keycloak ficar pronto e autenticar o kcadm
+      ansible.builtin.command: >
+        docker compose exec -T keycloak /opt/keycloak/bin/kcadm.sh config credentials
+        --server http://localhost:8080 --realm master --user admin
+        --password {{ keycloak_admin_password | quote }}
+      args:
+        chdir: "{{ app_dir }}"
+      register: kc_login
+      retries: 30
+      delay: 10
+      until: kc_login.rc == 0
+      changed_when: false
+      no_log: true
+
+    - name: Definir a senha inicial dos usuários do sistema (valores do cofre)
+      ansible.builtin.command: >
+        docker compose exec -T keycloak /opt/keycloak/bin/kcadm.sh set-password
+        -r {{ keycloak_realm }} --username {{ item.username }}
+        --new-password {{ item.password | quote }}
+      args:
+        chdir: "{{ app_dir }}"
+      loop: "{{ demo_users }}"
+      changed_when: true
+      no_log: true
+
+    - name: Conferir o endurecimento do SSH (S1) - deve mostrar "no" nas duas linhas
+      ansible.builtin.shell: sshd -T | grep -E "^(passwordauthentication|permitrootlogin)"
+      register: sshd_check
+      changed_when: false
+
+    - ansible.builtin.assert:
+        that:
+          - "'passwordauthentication no' in sshd_check.stdout"
+          - "'permitrootlogin no' in sshd_check.stdout"
+        success_msg: "SSH endurecido: senha e root desativados"
+
+    - name: Esperar o Nginx responder (é o que o ALB testa)
+      ansible.builtin.uri:
+        url: http://localhost/
+        status_code: 200
+      register: health
+      retries: 30
+      delay: 10
+      until: health.status == 200
+
+    - name: Mostrar containers
+      ansible.builtin.command: docker ps --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
+      register: ps
+      changed_when: false
+
+    - ansible.builtin.debug:
+        var: ps.stdout_lines
