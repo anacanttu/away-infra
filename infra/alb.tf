@@ -2,8 +2,10 @@ resource "aws_lb" "main" {
   name               = "alb-${var.project}"
   load_balancer_type = "application"
   internal           = false
-  security_groups    = [aws_security_group.alb.id]
-  subnets            = [aws_subnet.pub_a.id, aws_subnet.pub_b.id] # ALB exige 2 AZs
+  # Descarta cabeçalhos HTTP inválidos (mitiga request smuggling)
+  drop_invalid_header_fields = true
+  security_groups            = [aws_security_group.alb.id]
+  subnets                    = [aws_subnet.pub_a.id, aws_subnet.pub_b.id] # ALB exige 2 AZs
 }
 
 resource "aws_lb_target_group" "app" {

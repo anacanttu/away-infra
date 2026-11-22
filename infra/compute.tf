@@ -34,6 +34,7 @@ resource "aws_instance" "bastion" {
   subnet_id              = aws_subnet.pub_a.id
   vpc_security_group_ids = [aws_security_group.bastion.id]
   key_name               = aws_key_pair.main.key_name
+  ebs_optimized          = true
 
   user_data                   = local.ssh_hardening
   user_data_replace_on_change = true
@@ -66,6 +67,7 @@ resource "aws_instance" "app" {
   vpc_security_group_ids      = [aws_security_group.app.id]
   key_name                    = aws_key_pair.main.key_name
   associate_public_ip_address = false
+  ebs_optimized               = true
 
   user_data                   = local.ssh_hardening
   user_data_replace_on_change = true

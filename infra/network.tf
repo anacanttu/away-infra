@@ -26,7 +26,7 @@ resource "aws_subnet" "pub_a" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, 1)
   availability_zone       = local.az_a
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false # IP público só por Elastic IP explícito (bastion)
   tags                    = { Name = "pub-a" }
 }
 
@@ -34,7 +34,7 @@ resource "aws_subnet" "pub_b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, 2)
   availability_zone       = local.az_b
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false # IP público só por Elastic IP explícito (bastion)
   tags                    = { Name = "pub-b" }
 }
 
