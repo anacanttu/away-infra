@@ -98,6 +98,7 @@
       ansible.builtin.copy:
         content: "{{ lookup('file', 'away-realm.json') | replace('__KEYCLOAK_CLIENT_SECRET__', keycloak_client_secret) }}"
         dest: "{{ app_dir }}/keycloak/import/away-realm.json"
+        owner: "1000" # usuário do Keycloak dentro do container (precisa ler o arquivo)
         mode: "0600"
       no_log: true
 
