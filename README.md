@@ -7,7 +7,6 @@ Projeto Integrador | Uniamérica Descomplica | Disciplina: Projeto Integrador | 
 | Integrante | GitHub |
 |---|---|
 | Ana Luisa Cantu | [@anacanttu](https://github.com/anacanttu) |
-| Pablo | @ |
 
 ## Visão geral
 
@@ -188,17 +187,17 @@ Resultados e decisões: [`docs/seguranca.md`](docs/seguranca.md).
 
 ## Divisão das demonstrações
 
-Cada integrante conduz ao menos uma demonstração (roteiro do enunciado, seção 10.1):
+O grupo da Entrega 2 tem **uma integrante**, que conduz todas as demonstrações (roteiro do enunciado, seção 10.1). Ver a errata, item 10:
 
 | Etapa | Demonstração | Responsável |
 |---|---|---|
-| D1 | Estado consistente: `terraform plan` sem alterações e `terraform output` | **PREENCHER** |
-| D2 | Aplicação por HTTPS (S3) e funcionalidade verificável | **PREENCHER** |
-| D3 | Acesso administrativo: SSH ao bastion, à instância privada pelo bastion e recusa de senha (S1) | **PREENCHER** |
-| D4 | NAT e isolamento: IP de saída da instância privada igual ao IP do NAT | **PREENCHER** |
-| D5 | Segurança: segredos fora do código (S4) e relatório de análise (S7) | **PREENCHER** |
-| D6 | Backup: política mínima configurada e custo anual da política GFS | **PREENCHER** |
-| D7 | Alta disponibilidade: diagrama proposto e análise de custo | **PREENCHER** |
+| D1 | Estado consistente: `terraform plan` sem alterações e `terraform output` | Ana Luisa Cantu |
+| D2 | Aplicação por HTTPS (S3) e funcionalidade verificável | Ana Luisa Cantu |
+| D3 | Acesso administrativo: SSH ao bastion, à instância privada pelo bastion e recusa de senha (S1) | Ana Luisa Cantu |
+| D4 | NAT e isolamento: IP de saída da instância privada igual ao IP do NAT | Ana Luisa Cantu |
+| D5 | Segurança: segredos fora do código (S4) e relatório de análise (S7) | Ana Luisa Cantu |
+| D6 | Backup: política mínima configurada e custo anual da política GFS | Ana Luisa Cantu |
+| D7 | Alta disponibilidade: diagrama proposto e análise de custo | Ana Luisa Cantu |
 
 ## Documentação
 
