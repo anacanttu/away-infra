@@ -18,11 +18,11 @@ Cada linha registra uma diferença entre o documento da Entrega 1 e a implantaç
 
 **O que aconteceu.** O repositório público do backend (`anacanttu/Backend-AWAY`) continha, desde antes desta entrega, arquivos com credenciais e chaves: senha de um banco RDS antigo (região Ohio) e de uma VM antiga (`98.83.35.183`), `JWT_SECRET`, arquivos `.env` e chaves privadas em `certs/`. O Gitleaks (S7) confirmou **10 achados no histórico** (`evidencias/gitleaks-backend-away.json`, valores ocultos).
 
-**Quando foi identificado.** Em novembro de 2026 (**PREENCHER: data**), durante a preparação da implantação, ao ler o repositório para criar o deploy.
+**Quando foi identificado.** Em **17/11/2026**, durante a preparação da implantação, ao ler o repositório para criar o deploy.
 
 **O que foi feito.**
 
-- Os arquivos foram **removidos da branch principal** pelo pull request nº 1 do repositório do backend, mesclado pelo grupo (**PREENCHER: data exata, visível em Backend-AWAY#1 no GitHub**).
+- Os arquivos foram **removidos da branch principal** pelo pull request nº 1 do repositório do backend, mesclado em **18/11/2026** (Backend-AWAY#1).
 - Trechos que repetiam valores (`INSTRUCOES-VM.md`, `corrigir-cors-vm.sh`) foram trocados por *placeholders*.
 - O `.gitignore` passou a bloquear certificados, chaves e `environment.config`.
 - A aplicação implantada **não usa nenhum desses valores**: a senha do banco é gerada pela AWS (Secrets Manager) e o `JWT_SECRET` nem é usado pelo código.
@@ -31,7 +31,7 @@ Cada linha registra uma diferença entre o documento da Entrega 1 e a implantaç
 
 | Credencial | Ação necessária | Situação |
 |---|---|---|
-| Senha do RDS antigo (Ohio) | Trocar a senha ou **apagar** o banco antigo | **PREENCHER: data e o que foi feito** |
+| Senha do RDS antigo (Ohio) | Trocar a senha ou **apagar** o banco antigo | Em 22/11/2026, consulta à API da conta AWS atual na região `us-east-2` **não encontrou nenhuma instância RDS, EC2 ou ambiente Beanstalk**. **PREENCHER:** confirmar se o banco foi apagado por vocês (e quando), ou se estava em **outra conta** |
 | Senha da VM `98.83.35.183` | Trocar a senha ou **apagar** a VM | **PREENCHER: data e o que foi feito** |
 | `JWT_SECRET` antigo | Considerar comprometido (não é usado pela aplicação atual) | Sem ação |
 | Autoridade certificadora e chaves de `certs/` | Remover de qualquer computador em que tenham sido instaladas como confiáveis | **PREENCHER** |
