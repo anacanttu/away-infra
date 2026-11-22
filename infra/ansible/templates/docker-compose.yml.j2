@@ -33,8 +33,4 @@ services:
       JAVA_OPTS_KC_HEAP: "-Xms128m -Xmx512m"
     volumes:
       - {{ app_dir }}/keycloak/import:/opt/keycloak/data/import:ro
-      - keycloak_data:/opt/keycloak/data/h2
     mem_limit: 900m
-
-volumes:
-  keycloak_data:
