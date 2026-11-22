@@ -1,0 +1,6 @@
+# Copie para terraform.tfvars e preencha (o terraform.tfvars real NÃO vai para o Git)
+admin_cidr          = "SEU.IP.PUBLICO.AQUI/32"   # descubra com: curl ifconfig.me
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"    # chave PÚBLICA
+budget_email        = "seu@email.com"            # alerta de custo
+# monthly_budget_usd = 30
+# domain_name        = "aidados.co"

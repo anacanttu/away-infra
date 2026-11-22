@@ -1,0 +1,305 @@
+
+Report Summary
+
+┌─────────────┬───────────┬───────────────────┐
+│   Target    │   Type    │ Misconfigurations │
+├─────────────┼───────────┼───────────────────┤
+│ .           │ terraform │         0         │
+├─────────────┼───────────┼───────────────────┤
+│ alb.tf      │ terraform │         2         │
+├─────────────┼───────────┼───────────────────┤
+│ database.tf │ terraform │         4         │
+├─────────────┼───────────┼───────────────────┤
+│ network.tf  │ terraform │         3         │
+├─────────────┼───────────┼───────────────────┤
+│ security.tf │ terraform │         4         │
+└─────────────┴───────────┴───────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+alb.tf (terraform)
+==================
+Tests: 2 (SUCCESSES: 0, FAILURES: 2)
+Failures: 2 (LOW: 0, MEDIUM: 0, HIGH: 2, CRITICAL: 0)
+
+AWS-0052 (HIGH): Application load balancer is not set to drop invalid headers.
+════════════════════════════════════════
+Passing unknown or invalid headers through to the target poses a potential risk of compromise.
+By setting drop_invalid_header_fields to true, anything that does not conform to well known, defined headers will be removed by the load balancer.
+
+
+See https://avd.aquasec.com/misconfig/aws-0052
+────────────────────────────────────────
+ alb.tf:1-7
+────────────────────────────────────────
+   1 ┌ resource "aws_lb" "main" {
+   2 │   name               = "alb-${var.project}"
+   3 │   load_balancer_type = "application"
+   4 │   internal           = false
+   5 │   security_groups    = [aws_security_group.alb.id]
+   6 │   subnets            = [aws_subnet.pub_a.id, aws_subnet.pub_b.id] # ALB exige 2 AZs
+   7 └ }
+────────────────────────────────────────
+
+
+AWS-0053 (HIGH): Load balancer is exposed publicly.
+════════════════════════════════════════
+There are many scenarios in which you would want to expose a load balancer to the wider internet, but this check exists as a warning to prevent accidental exposure of internal assets. You should ensure that this resource should be exposed publicly.
+
+
+See https://avd.aquasec.com/misconfig/aws-0053
+────────────────────────────────────────
+ alb.tf:4
+   via alb.tf:1-7 (aws_lb.main)
+────────────────────────────────────────
+   1   resource "aws_lb" "main" {
+   2     name               = "alb-${var.project}"
+   3     load_balancer_type = "application"
+   4 [   internal           = false
+   5     security_groups    = [aws_security_group.alb.id]
+   6     subnets            = [aws_subnet.pub_a.id, aws_subnet.pub_b.id] # ALB exige 2 AZs
+   7   }
+────────────────────────────────────────
+
+
+
+database.tf (terraform)
+=======================
+Tests: 4 (SUCCESSES: 0, FAILURES: 4)
+Failures: 4 (LOW: 1, MEDIUM: 3, HIGH: 0, CRITICAL: 0)
+
+AWS-0077 (MEDIUM): Instance has very low backup retention period.
+════════════════════════════════════════
+RDS backup retention for clusters defaults to 1 day, this may not be enough to identify and respond to an issue. Backup retention periods should be set to a period that is a balance on cost and limiting risk.
+
+
+See https://avd.aquasec.com/misconfig/aws-0077
+────────────────────────────────────────
+ database.tf:27
+   via database.tf:6-35 (aws_db_instance.main)
+────────────────────────────────────────
+   6   resource "aws_db_instance" "main" {
+   .   
+  27 [   backup_retention_period  = var.db_backup_retention_days
+  ..   
+  35   }
+────────────────────────────────────────
+
+
+AWS-0133 (LOW): Instance does not have performance insights enabled.
+════════════════════════════════════════
+Enabling Performance insights allows for greater depth in monitoring data.
+For example, information about active sessions could help diagose a compromise or assist in the investigation
+
+
+See https://avd.aquasec.com/misconfig/aws-0133
+────────────────────────────────────────
+ database.tf:6-35
+────────────────────────────────────────
+   6 ┌ resource "aws_db_instance" "main" {
+   7 │   identifier     = "db-${var.project}"
+   8 │   engine         = "postgres"
+   9 │   engine_version = "16"
+  10 │   instance_class = var.db_instance_class
+  11 │ 
+  12 │   allocated_storage = 20
+  13 │   storage_type      = "gp3"
+  14 └   storage_encrypted = true # S6: declarado explicitamente (inclui backups e snapshots)
+  ..   
+────────────────────────────────────────
+
+
+AWS-0176 (MEDIUM): Instance does not have IAM Authentication enabled
+════════════════════════════════════════
+Ensure IAM Database Authentication is enabled for RDS database instances to manage database access
+
+See https://avd.aquasec.com/misconfig/aws-0176
+────────────────────────────────────────
+ database.tf:6-35
+────────────────────────────────────────
+   6 ┌ resource "aws_db_instance" "main" {
+   7 │   identifier     = "db-${var.project}"
+   8 │   engine         = "postgres"
+   9 │   engine_version = "16"
+  10 │   instance_class = var.db_instance_class
+  11 │ 
+  12 │   allocated_storage = 20
+  13 │   storage_type      = "gp3"
+  14 └   storage_encrypted = true # S6: declarado explicitamente (inclui backups e snapshots)
+  ..   
+────────────────────────────────────────
+
+
+AWS-0177 (MEDIUM): Instance does not have Deletion Protection enabled
+════════════════════════════════════════
+Ensure deletion protection is enabled for RDS database instances.
+
+See https://avd.aquasec.com/misconfig/aws-0177
+────────────────────────────────────────
+ database.tf:34
+   via database.tf:6-35 (aws_db_instance.main)
+────────────────────────────────────────
+   6   resource "aws_db_instance" "main" {
+   .   
+  34 [   deletion_protection        = false # permite o terraform destroy
+  35   }
+────────────────────────────────────────
+
+
+
+network.tf (terraform)
+======================
+Tests: 3 (SUCCESSES: 0, FAILURES: 3)
+Failures: 3 (LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 0)
+
+AWS-0164 (HIGH): Subnet associates public IP address.
+════════════════════════════════════════
+You should limit the provision of public IP addresses for resources. Resources should not be exposed on the public internet, but should have access limited to consumers required for the function of your application.
+
+
+See https://avd.aquasec.com/misconfig/aws-0164
+────────────────────────────────────────
+ network.tf:29
+   via network.tf:25-31 (aws_subnet.pub_a)
+────────────────────────────────────────
+  25   resource "aws_subnet" "pub_a" {
+  26     vpc_id                  = aws_vpc.main.id
+  27     cidr_block              = cidrsubnet(var.vpc_cidr, 8, 1)
+  28     availability_zone       = local.az_a
+  29 [   map_public_ip_on_launch = true
+  30     tags                    = { Name = "pub-a" }
+  31   }
+────────────────────────────────────────
+
+
+AWS-0164 (HIGH): Subnet associates public IP address.
+════════════════════════════════════════
+You should limit the provision of public IP addresses for resources. Resources should not be exposed on the public internet, but should have access limited to consumers required for the function of your application.
+
+
+See https://avd.aquasec.com/misconfig/aws-0164
+────────────────────────────────────────
+ network.tf:37
+   via network.tf:33-39 (aws_subnet.pub_b)
+────────────────────────────────────────
+  33   resource "aws_subnet" "pub_b" {
+  34     vpc_id                  = aws_vpc.main.id
+  35     cidr_block              = cidrsubnet(var.vpc_cidr, 8, 2)
+  36     availability_zone       = local.az_b
+  37 [   map_public_ip_on_launch = true
+  38     tags                    = { Name = "pub-b" }
+  39   }
+────────────────────────────────────────
+
+
+AWS-0178 (MEDIUM): VPC does not have VPC Flow Logs enabled.
+════════════════════════════════════════
+VPC Flow Logs provide visibility into network traffic that traverses the VPC and can be used to detect anomalous traffic or insight during security workflows.
+
+
+See https://avd.aquasec.com/misconfig/aws-0178
+────────────────────────────────────────
+ network.tf:11-17
+────────────────────────────────────────
+  11 ┌ resource "aws_vpc" "main" {
+  12 │   cidr_block           = var.vpc_cidr # 10.20.0.0/16
+  13 │   enable_dns_support   = true
+  14 │   enable_dns_hostnames = true
+  15 │ 
+  16 │   tags = { Name = "vpc-${var.project}" }
+  17 └ }
+────────────────────────────────────────
+
+
+
+security.tf (terraform)
+=======================
+Tests: 4 (SUCCESSES: 0, FAILURES: 4)
+Failures: 4 (LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 4)
+
+AWS-0104 (CRITICAL): Security group rule allows unrestricted egress to any IP address.
+════════════════════════════════════════
+Opening up ports to connect out to the public internet is generally to be avoided. You should restrict access to IP addresses or ranges that are explicitly required where possible.
+
+
+See https://avd.aquasec.com/misconfig/aws-0104
+────────────────────────────────────────
+ security.tf:150
+   via security.tf:144-151 (aws_vpc_security_group_egress_rule.app_http)
+────────────────────────────────────────
+ 144   resource "aws_vpc_security_group_egress_rule" "app_http" {
+ 145     security_group_id = aws_security_group.app.id
+ 146     description       = "HTTP para repositorios de pacotes"
+ 147     ip_protocol       = "tcp"
+ 148     from_port         = 80
+ 149     to_port           = 80
+ 150 [   cidr_ipv4         = "0.0.0.0/0"
+ 151   }
+────────────────────────────────────────
+
+
+AWS-0104 (CRITICAL): Security group rule allows unrestricted egress to any IP address.
+════════════════════════════════════════
+Opening up ports to connect out to the public internet is generally to be avoided. You should restrict access to IP addresses or ranges that are explicitly required where possible.
+
+
+See https://avd.aquasec.com/misconfig/aws-0104
+────────────────────────────────────────
+ security.tf:141
+   via security.tf:135-142 (aws_vpc_security_group_egress_rule.app_https)
+────────────────────────────────────────
+ 135   resource "aws_vpc_security_group_egress_rule" "app_https" {
+ 136     security_group_id = aws_security_group.app.id
+ 137     description       = "HTTPS: pacotes, imagens Docker, internet via NAT"
+ 138     ip_protocol       = "tcp"
+ 139     from_port         = 443
+ 140     to_port           = 443
+ 141 [   cidr_ipv4         = "0.0.0.0/0"
+ 142   }
+────────────────────────────────────────
+
+
+AWS-0104 (CRITICAL): Security group rule allows unrestricted egress to any IP address.
+════════════════════════════════════════
+Opening up ports to connect out to the public internet is generally to be avoided. You should restrict access to IP addresses or ranges that are explicitly required where possible.
+
+
+See https://avd.aquasec.com/misconfig/aws-0104
+────────────────────────────────────────
+ security.tf:95
+   via security.tf:89-96 (aws_vpc_security_group_egress_rule.bastion_http)
+────────────────────────────────────────
+  89   resource "aws_vpc_security_group_egress_rule" "bastion_http" {
+  90     security_group_id = aws_security_group.bastion.id
+  91     description       = "HTTP para repositorios de pacotes"
+  92     ip_protocol       = "tcp"
+  93     from_port         = 80
+  94     to_port           = 80
+  95 [   cidr_ipv4         = "0.0.0.0/0"
+  96   }
+────────────────────────────────────────
+
+
+AWS-0104 (CRITICAL): Security group rule allows unrestricted egress to any IP address.
+════════════════════════════════════════
+Opening up ports to connect out to the public internet is generally to be avoided. You should restrict access to IP addresses or ranges that are explicitly required where possible.
+
+
+See https://avd.aquasec.com/misconfig/aws-0104
+────────────────────────────────────────
+ security.tf:86
+   via security.tf:80-87 (aws_vpc_security_group_egress_rule.bastion_https)
+────────────────────────────────────────
+  80   resource "aws_vpc_security_group_egress_rule" "bastion_https" {
+  81     security_group_id = aws_security_group.bastion.id
+  82     description       = "HTTPS para atualizacao de pacotes"
+  83     ip_protocol       = "tcp"
+  84     from_port         = 443
+  85     to_port           = 443
+  86 [   cidr_ipv4         = "0.0.0.0/0"
+  87   }
+────────────────────────────────────────
+
+

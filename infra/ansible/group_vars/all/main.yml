@@ -1,0 +1,16 @@
+# Variáveis NÃO secretas
+region: sa-east-1
+app_domain: away.aidados.co
+app_dir: /opt/away
+compose_version: v2.29.7
+
+# Artefatos gerados pelo build.sh
+backend_war: "{{ playbook_dir }}/build/backend/target/away-0.0.1-SNAPSHOT.war"
+frontend_dist: "{{ playbook_dir }}/build/frontend/dist/away-sistema-patronato/browser/"
+
+db_name: away
+db_user: away_admin
+
+keycloak_realm: away
+keycloak_client_id: away-backend
+keycloak_image: quay.io/keycloak/keycloak:24.0.0
