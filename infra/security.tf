@@ -42,7 +42,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_https" {
 
 resource "aws_vpc_security_group_ingress_rule" "alb_http" {
   security_group_id = aws_security_group.alb.id
-  description       = "HTTP da internet (só redireciona para HTTPS)"
+  description       = "HTTP da internet (so redireciona para HTTPS)"
   ip_protocol       = "tcp"
   from_port         = 80
   to_port           = 80

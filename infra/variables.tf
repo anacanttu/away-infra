@@ -57,9 +57,9 @@ variable "app_instance_type" {
 }
 
 variable "bastion_instance_type" {
-  description = "Tipo da EC2 do bastion. Definido na Entrega 1: t4g.nano"
+  description = "Tipo da EC2 do bastion. A Entrega 1 previa t4g.nano, mas contas no plano gratuito da AWS só aceitam tipos elegíveis (t4g.micro/t4g.small); ver docs/errata.md, item 11"
   type        = string
-  default     = "t4g.nano"
+  default     = "t4g.micro"
 }
 
 variable "db_instance_class" {
