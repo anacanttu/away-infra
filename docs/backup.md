@@ -77,6 +77,8 @@ aws rds describe-db-snapshots --region sa-east-1 --db-instance-identifier db-awa
   --query "DBSnapshots[].{id:DBSnapshotIdentifier,status:Status,criada:SnapshotCreateTime,criptografado:Encrypted}"
 ```
 
+**Verificado em 22/11/2026** (ver [`evidencias/verificacao-aws-2026-11-22.txt`](evidencias/verificacao-aws-2026-11-22.txt)): retenção de 1 dia, criptografia ativa e **um snapshot automático existente** (`status: available`, `Encrypted: true`).
+
 Observação do enunciado: a expiração é feita pelo provedor de forma **assíncrona**; o backup pode ficar um pouco além de 1 dia antes de ser removido.
 
 ### O que a política mínima **não** protege (em comparação com a GFS)

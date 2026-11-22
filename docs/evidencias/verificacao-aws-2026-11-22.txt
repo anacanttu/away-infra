@@ -1,0 +1,207 @@
+Verificações executadas em 22/11/2026 15:22 (horário de Brasília) contra a infraestrutura implantada pelo código do repositório.
+
+## D1: terraform plan
+No changes. Your infrastructure matches the configuration.
+
+## D1: outputs (sem segredos)
+alb_dns_name = "alb-away-339441095.sa-east-1.elb.amazonaws.com"
+app_private_ip = "10.20.10.23"
+app_url = "https://away.aidados.co"
+bastion_private_ip = "10.20.1.18"
+bastion_public_ip = "15.229.172.48"
+db_endpoint = "db-away.cp2aqiywkra0.sa-east-1.rds.amazonaws.com:5432"
+dns_cname_para_criar = "away.aidados.co -> alb-away-339441095.sa-east-1.elb.amazonaws.com"
+nat_public_ip = "52.67.101.29"
+
+## S6/B6: RDS (retenção, janela, criptografia, última restauração possível)
+{
+    "engine": "postgres",
+    "versao": "16.13",
+    "classe": "db.t4g.micro",
+    "multiAZ": false,
+    "publico": false,
+    "criptografado": true,
+    "retencaoDias": 1,
+    "janelaBackup": "03:00-04:00",
+    "ultimaRestauracaoPossivel": "2026-11-22T18:19:17+00:00"
+}
+
+## B6: snapshots automáticos do RDS (cópia existente)
+[
+    {
+        "tipo": "automated",
+        "status": "available",
+        "criada": "2026-11-22T17:41:15.808000+00:00",
+        "criptografado": true
+    }
+]
+
+## S6: volumes EBS criptografados
+[
+    {
+        "tamanhoGB": 8,
+        "tipo": "gp3",
+        "criptografado": true
+    },
+    {
+        "tamanhoGB": 20,
+        "tipo": "gp3",
+        "criptografado": true
+    }
+]
+
+## R5/S5: instâncias (IP público e perfil IAM)
+[
+    {
+        "nome": "app-away",
+        "tipo": "t4g.small",
+        "ipPublico": null,
+        "ipPrivado": "10.20.10.23",
+        "perfilIAM": null,
+        "IMDSv2": "required"
+    },
+    {
+        "nome": "bastion",
+        "tipo": "t4g.micro",
+        "ipPublico": "15.229.172.48",
+        "ipPrivado": "10.20.1.18",
+        "perfilIAM": null,
+        "IMDSv2": "required"
+    }
+]
+
+## S2: regras de saída de cada security group (sem 'todos os protocolos')
+[
+    {
+        "grupo": "sg-app",
+        "saida": [
+            {
+                "proto": "tcp",
+                "de": 80,
+                "ate": 80,
+                "destino": [
+                    "0.0.0.0/0"
+                ]
+            },
+            {
+                "proto": "tcp",
+                "de": 5432,
+                "ate": 5432,
+                "destino": [
+                    "sg-0a43cbbf8d37c603a"
+                ]
+            },
+            {
+                "proto": "tcp",
+                "de": 53,
+                "ate": 53,
+                "destino": [
+                    "10.20.0.0/16"
+                ]
+            },
+            {
+                "proto": "udp",
+                "de": 53,
+                "ate": 53,
+                "destino": [
+                    "10.20.0.0/16"
+                ]
+            },
+            {
+                "proto": "tcp",
+                "de": 443,
+                "ate": 443,
+                "destino": [
+                    "0.0.0.0/0"
+                ]
+            }
+        ]
+    },
+    {
+        "grupo": "sg-bastion",
+        "saida": [
+            {
+                "proto": "tcp",
+                "de": 80,
+                "ate": 80,
+                "destino": [
+                    "0.0.0.0/0"
+                ]
+            },
+            {
+                "proto": "tcp",
+                "de": 22,
+                "ate": 22,
+                "destino": [
+                    "sg-0659e41c6f0c348ac"
+                ]
+            },
+            {
+                "proto": "tcp",
+                "de": 53,
+                "ate": 53,
+                "destino": [
+                    "10.20.0.0/16"
+                ]
+            },
+            {
+                "proto": "udp",
+                "de": 53,
+                "ate": 53,
+                "destino": [
+                    "10.20.0.0/16"
+                ]
+            },
+            {
+                "proto": "tcp",
+                "de": 443,
+                "ate": 443,
+                "destino": [
+                    "0.0.0.0/0"
+                ]
+            }
+        ]
+    },
+    {
+        "grupo": "sg-db",
+        "saida": []
+    },
+    {
+        "grupo": "sg-alb",
+        "saida": [
+            {
+                "proto": "tcp",
+                "de": 80,
+                "ate": 80,
+                "destino": [
+                    "sg-0659e41c6f0c348ac"
+                ]
+            }
+        ]
+    }
+]
+
+## S1/R7: SSH só do CIDR do admin e sem senha
+[
+    {
+        "porta": 22,
+        "origem": [
+            "<IP-publico-do-administrador>/32"
+        ]
+    }
+]
+tentativa de login por senha no bastion:
+ubuntu@15.229.172.48: Permission denied (publickey).
+sshd na instância privada (via bastion):
+permitrootlogin no
+passwordauthentication no
+IP de saída (curl ifconfig.me): 52.67.101.29
+IP do NAT (output): 52.67.101.29
+
+## S3: HTTPS
+HTTP/2 200 
+HTTP -> 301 redireciona para https://away.aidados.co:443/
+  subject=CN = away.aidados.co
+  issuer=C = US, O = Amazon, CN = Amazon RSA 2048 S23
+  notBefore=Nov 22 16:29:55 2026 GMT
+  notAfter=Jun  8 17:29:55 2027 GMT
