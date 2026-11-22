@@ -13,7 +13,7 @@ Cada linha registra uma diferença entre o documento da Entrega 1 e a implantaç
 | 7 | Senhas de login do sistema | As mesmas do ambiente local | **Definidas pelo Ansible a partir do cofre**; o arquivo do realm no repositório **não tem hashes de senha** | Para não versionar credenciais. Quem opera lê as senhas com `ansible-vault view`. | Nenhum |
 | 8 | Retenção do backup do RDS | Não definida (RDS com backup automático, ADR-003) | **1 dia**, com validação que impede mais de 2 | Política mínima do enunciado (seção 6.3). | ADR-003 continua válido; ADR-005 detalha |
 | 9 | Escopo dos recursos extras | ALB, NAT, RDS, 2 EC2 | Além disso: **ACM** (certificado), **Elastic IP** do bastion, **budget** | Exigências de S3 (HTTPS), R6 (IP estático) e do alerta de orçamento. | Nenhum |
-| 10 | Composição do grupo | A Entrega 1 foi feita por **dois integrantes** (Ana Luisa Cantu e Pablo) | A Entrega 2 é entregue e apresentada por **uma integrante** (Ana Luisa Cantu), pois o outro integrante deixou o grupo (**PREENCHER: data e como o professor foi informado**) | Mudança na composição do grupo. A divisão das demonstrações no README foi ajustada: uma só pessoa conduz D1 a D7 e responde pela defesa técnica. | Nenhum |
+| 10 | Composição do grupo | A Entrega 1 foi feita por **dois integrantes** (Ana Luisa Cantu e Pablo) | A Entrega 2 é entregue e apresentada por **uma integrante** (Ana Luisa Cantu), pois o outro integrante deixou o grupo. **O registro da comunicação ao professor está pendente de confirmação pela integrante** (a data e o meio não foram informados até a entrega) | Mudança na composição do grupo. A divisão das demonstrações no README foi ajustada: uma só pessoa conduz D1 a D7 e responde pela defesa técnica. | Nenhum |
 | 11 | Tipo da instância do bastion | `t4g.nano` (seção 5.7) | **`t4g.micro`** (custo de cerca de US$ 0,017 por hora, em vez de US$ 0,008) | A conta do grupo está no plano gratuito da AWS, que **recusa** `t4g.nano` na criação (`The specified instance type is not eligible for Free Tier`). O `t4g.micro` é o menor tipo ARM aceito. Diferença de cerca de US$ 6 por mês, irrelevante para o período do trabalho. O tipo é variável (`bastion_instance_type`), então basta voltar a `t4g.nano` numa conta paga. | Nenhum |
 | 12 | Descrição de regra de segurança | Texto com acento | Descrições sem acentos | A AWS aceita só um conjunto de caracteres ASCII nas descrições de regras (o primeiro `apply` falhou em `alb_http` por causa de um `ó`). Corrigido no código. | Nenhum |
 
@@ -32,13 +32,15 @@ Cada linha registra uma diferença entre o documento da Entrega 1 e a implantaç
 
 **O que ainda depende do grupo (revogação).** Remover o arquivo não basta, porque ele permanece no histórico do Git.
 
-| Credencial | Ação necessária | Situação |
+| Credencial | Ação necessária | Situação na data da entrega (22/11/2026) |
 |---|---|---|
-| Senha do RDS antigo (Ohio) | Trocar a senha ou **apagar** o banco antigo | Em 22/11/2026, consulta à API da conta AWS atual na região `us-east-2` **não encontrou nenhuma instância RDS, EC2 ou ambiente Beanstalk**. **PREENCHER:** confirmar se o banco foi apagado por vocês (e quando), ou se estava em **outra conta** |
-| Senha da VM `98.83.35.183` | Trocar a senha ou **apagar** a VM | **PREENCHER: data e o que foi feito** |
-| `JWT_SECRET` antigo | Considerar comprometido (não é usado pela aplicação atual) | Sem ação |
-| Autoridade certificadora e chaves de `certs/` | Remover de qualquer computador em que tenham sido instaladas como confiáveis | **PREENCHER** |
-| Uso da mesma senha em outros serviços | Trocar nesses serviços | **PREENCHER** |
+| Senha do RDS antigo (Ohio) | Trocar a senha ou **apagar** o banco antigo | **Não confirmada pelo grupo.** A consulta à API da conta AWS atual, na região `us-east-2`, **não encontrou** nenhuma instância RDS, EC2 ou ambiente Beanstalk. O grupo não conseguiu confirmar se o banco foi apagado ou se estava em outra conta. A revogação continua **pendente de confirmação** |
+| Senha da VM `98.83.35.183` | Trocar a senha ou **apagar** a VM | **Não confirmada.** Pendente |
+| `JWT_SECRET` antigo | Considerar comprometido (não é usado pela aplicação atual) | Sem ação necessária |
+| Autoridade certificadora e chaves de `certs/` | Remover de qualquer computador em que tenham sido instaladas como confiáveis | **Não confirmada.** Pendente de conferência |
+| Uso da mesma senha em outros serviços | Trocar nesses serviços | **Não confirmada.** Pendente de conferência |
+
+**Compromisso do grupo.** As pendências acima serão verificadas e resolvidas **depois da entrega**, e o resultado será registrado em [`evidencias/revogacao-credenciais.md`](evidencias/revogacao-credenciais.md) (pasta que o enunciado permite alterar após a tag). Até lá, o risco residual é o descrito na análise de ameaças (`seguranca.md`, ameaça 2): quem tiver acesso ao histórico público do `Backend-AWAY` pode obter as credenciais antigas, **que não são usadas por esta implantação**.
 
 O **histórico** do repositório do backend continua contendo os valores antigos. Reescrever o histórico (`git filter-repo` + *force push*) é possível, mas quebraria os clones do outro integrante; a revogação acima é a medida que de fato protege.
 

@@ -48,7 +48,7 @@ Claude Code (Anthropic), como assistente de programação e de redação técnic
 
 ## O que o grupo verificou ou corrigiu
 
-> **PREENCHER pelo grupo antes de entregar.** Esta seção só deve registrar o que cada integrante de fato conferiu.
+> Esta seção registra apenas o que a integrante de fato conferiu. **Os itens sem marca não foram confirmados até a data da entrega** e ficam como pendências.
 
 - [ ] Leitura e compreensão de cada arquivo Terraform e do playbook Ansible pela integrante (o professor pode perguntar sobre qualquer parte).
 - [ ] Conferência dos custos na AWS Pricing Calculator.
