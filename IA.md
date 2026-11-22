@@ -50,7 +50,7 @@ Claude Code (Anthropic), como assistente de programação e de redação técnic
 
 > **PREENCHER pelo grupo antes de entregar.** Esta seção só deve registrar o que cada integrante de fato conferiu.
 
-- [ ] Leitura e compreensão de cada arquivo Terraform e do playbook Ansible por **ambos** os integrantes (o professor pode perguntar sobre qualquer parte).
+- [ ] Leitura e compreensão de cada arquivo Terraform e do playbook Ansible pela integrante (o professor pode perguntar sobre qualquer parte).
 - [ ] Conferência dos custos na AWS Pricing Calculator.
 - [ ] Revisão das decisões de `seguranca.md` (achados aceitos e corrigidos).
 - [ ] Preenchimento da revogação das credenciais antigas em `errata.md`.

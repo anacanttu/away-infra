@@ -13,6 +13,7 @@ Cada linha registra uma diferença entre o documento da Entrega 1 e a implantaç
 | 7 | Senhas de login do sistema | As mesmas do ambiente local | **Definidas pelo Ansible a partir do cofre**; o arquivo do realm no repositório **não tem hashes de senha** | Para não versionar credenciais. Quem opera lê as senhas com `ansible-vault view`. | Nenhum |
 | 8 | Retenção do backup do RDS | Não definida (RDS com backup automático, ADR-003) | **1 dia**, com validação que impede mais de 2 | Política mínima do enunciado (seção 6.3). | ADR-003 continua válido; ADR-005 detalha |
 | 9 | Escopo dos recursos extras | ALB, NAT, RDS, 2 EC2 | Além disso: **ACM** (certificado), **Elastic IP** do bastion, **budget** | Exigências de S3 (HTTPS), R6 (IP estático) e do alerta de orçamento. | Nenhum |
+| 10 | Composição do grupo | A Entrega 1 foi feita por **dois integrantes** (Ana Luisa Cantu e Pablo) | A Entrega 2 é entregue e apresentada por **uma integrante** (Ana Luisa Cantu), pois o outro integrante deixou o grupo (**PREENCHER: data e como o professor foi informado**) | Mudança na composição do grupo. A divisão das demonstrações no README foi ajustada: uma só pessoa conduz D1 a D7 e responde pela defesa técnica. | Nenhum |
 
 ## Incidente de segurança: segredos no repositório do backend
 
